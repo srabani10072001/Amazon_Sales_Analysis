@@ -1,0 +1,97 @@
+SELECT * FROM amazon_sales LIMIT 10;
+
+Q1:What is the total number of orders?
+SELECT COUNT(*) AS total_orders
+FROM amazon_sales;
+
+Q2: What is the total revenue?
+SELECT SUM("Amount") AS total_sales
+FROM amazon_sales;
+
+Q3: How many unique states are there?
+SELECT COUNT(DISTINCT "ship-state") AS total_states
+FROM amazon_sales;
+
+Q4: Top 5 cities by number of orders
+SELECT "ship-city", COUNT(*) AS total_orders
+FROM amazon_sales
+GROUP BY "ship-city"
+ORDER BY total_orders DESC
+LIMIT 5;
+
+Q5: State-wise total sales
+SELECT "ship-state", SUM("Amount") AS total_sales
+FROM amazon_sales
+GROUP BY "ship-state"
+ORDER BY total_sales DESC;
+
+Q6: Category-wise sales
+SELECT "Category", SUM("Amount") AS total_sales
+FROM amazon_sales
+GROUP BY "Category"
+ORDER BY total_sales DESC;
+
+Q7: Order status distribution
+SELECT "Status", COUNT(*) AS total_orders
+FROM amazon_sales
+GROUP BY "Status"
+ORDER BY total_orders DESC;
+
+Q8: Orders by sales channel
+SELECT sales_channel, COUNT(*) AS total_orders
+FROM amazon_sales
+GROUP BY sales_channel;
+
+Q9: Top 5 products (SKU) by sales
+SELECT "SKU", SUM(amount) AS total_sales
+FROM amazon_sales
+GROUP BY "SKU"
+ORDER BY total_sales DESC
+LIMIT 5;
+
+Q10: Monthly sales trend
+SELECT 
+    DATE_TRUNC('month', "Date") AS month,
+    SUM(amount) AS total_sales
+FROM amazon_sales
+GROUP BY month
+ORDER BY month;
+
+Q11: What is the average order value?
+SELECT AVG(amount) AS avg_order_value
+FROM amazon_sales;
+
+Q12: Top 5 states with highest average order value
+SELECT "ship-state", AVG(amount) AS avg_value
+FROM amazon_sales
+GROUP BY "ship-state"
+ORDER BY avg_value DESC
+LIMIT 5;
+
+Q13: Percentage of each order status
+SELECT 
+    status,
+    COUNT(*) * 100.0 / (SELECT COUNT(*) FROM amazon_sales) AS percentage
+FROM amazon_sales
+GROUP BY status;
+
+Q14: Courier status analysis
+SELECT "Courier_Status", COUNT(*) AS total_orders
+FROM amazon_sales
+GROUP BY "Courier_Status";
+
+Q15: Highest selling category in each state
+SELECT *
+FROM (
+    SELECT 
+        "ship-state",
+        category,
+        SUM(amount) AS total_sales,
+        RANK() OVER (
+            PARTITION BY "ship-state" 
+            ORDER BY SUM(amount) DESC
+        ) AS rnk
+    FROM amazon_sales
+    GROUP BY "ship-state", category
+) t
+WHERE rnk = 1;
